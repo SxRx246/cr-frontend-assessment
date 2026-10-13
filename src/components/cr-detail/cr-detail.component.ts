@@ -7,6 +7,7 @@ import { CrDetail, TimelineEntry } from '../../models/cr.models';
 import { idle, loading, ViewState } from '../../common/view-state';
 import { computeDiff, DiffRow } from '../diff.util';
 import { formatMoney } from '../../common/money.util';
+import { canApprovePolicy } from '../../common/permissions';
 
 /**
  * Change Request DETAIL page: loads a CR and renders the diff/preview, the approval timeline, and
@@ -28,7 +29,7 @@ export class CrDetailComponent implements OnInit {
 	// TODO: add validation so the form is invalid until a reason is entered.
 	rejectControl = new FormControl('', { nonNullable: true });
 
-	constructor(private readonly api: CrApiService, private readonly session: SessionService) {}
+	constructor(private readonly api: CrApiService, private readonly session: SessionService) { }
 
 	ngOnInit(): void {
 		void this.load();
@@ -60,9 +61,16 @@ export class CrDetailComponent implements OnInit {
 	}
 
 	/** Whether the current user may approve the loaded CR. */
+	// get canApprove(): boolean {
+	// 	// NOTE: this only looks at the CR status. The UI must also respect the user's permissions.
+	// 	return this.detail?.status === 'PENDING_APPROVAL';
+	// }
+
 	get canApprove(): boolean {
-		// NOTE: this only looks at the CR status. The UI must also respect the user's permissions.
-		return this.detail?.status === 'PENDING_APPROVAL';
+		return (
+			this.detail?.status === 'PENDING_APPROVAL' &&
+			canApprovePolicy(this.session.user)
+		);
 	}
 
 	get canReject(): boolean {
