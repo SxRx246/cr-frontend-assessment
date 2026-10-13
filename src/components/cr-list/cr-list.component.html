@@ -36,4 +36,9 @@
 			</tr>
 		</tbody>
 	</table>
+
+	<p *ngIf="state.status === 'loaded' && visibleRows.length === 0" class="cr-list__empty">
+		No change requests match the selected status.
+	</p>
+	
 </section>
