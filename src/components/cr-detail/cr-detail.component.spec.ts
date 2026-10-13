@@ -26,9 +26,15 @@ describe('CrDetailComponent', () => {
 		expect(fixture.nativeElement.querySelector('.cr-detail__header h2').textContent).toContain('Add 1 unit of SKU-A');
 	});
 
-	it('disables Approve for a read-only viewer on a pending CR', async () => {
-		const fixture = await render(users.viewer, 'CR-1'); // viewer: cr_r_o only; CR-1 is PENDING_APPROVAL
-		const approveBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.cr-actions__approve');
-		expect(approveBtn.disabled).toBe(true);
+	// it('disables Approve for a read-only viewer on a pending CR', async () => {
+	// 	const fixture = await render(users.viewer, 'CR-1'); // viewer: cr_r_o only; CR-1 is PENDING_APPROVAL
+	// 	const approveBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.cr-actions__approve');
+	// 	expect(approveBtn.disabled).toBe(true);
+	// });
+	
+	it('hides approval actions for a read-only viewer on a pending CR', async () => {
+		const fixture = await render(users.viewer, 'CR-1');
+		const actions: HTMLElement | null = fixture.nativeElement.querySelector('.cr-actions');
+		expect(actions).toBeNull();
 	});
 });
