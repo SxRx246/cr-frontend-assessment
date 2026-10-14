@@ -31,10 +31,61 @@ describe('CrDetailComponent', () => {
 	// 	const approveBtn: HTMLButtonElement = fixture.nativeElement.querySelector('.cr-actions__approve');
 	// 	expect(approveBtn.disabled).toBe(true);
 	// });
-	
+
 	it('hides approval actions for a read-only viewer on a pending CR', async () => {
 		const fixture = await render(users.viewer, 'CR-1');
 		const actions: HTMLElement | null = fixture.nativeElement.querySelector('.cr-actions');
 		expect(actions).toBeNull();
 	});
+
+
+	it('does not reject a change request with an empty reason', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const component = fixture.componentInstance;
+
+		component.rejectControl.setValue('');
+		await component.reject();
+
+		expect(component.detail?.status).toBe('PENDING_APPROVAL');
+		expect(component.rejectControl.invalid).toBe(true);
+	});
+
+	it('does not reject a change request with a whitespace-only reason', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const component = fixture.componentInstance;
+
+		component.rejectControl.setValue('   ');
+		await component.reject();
+
+		expect(component.detail?.status).toBe('PENDING_APPROVAL');
+		expect(component.rejectControl.invalid).toBe(true);
+	});
+
+	it('rejects a change request when a valid reason is provided', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const component = fixture.componentInstance;
+
+		component.rejectControl.setValue('Incorrect pricing');
+		await component.reject();
+
+		expect(component.detail?.status).toBe('REJECTED');
+		expect(component.actionError).toBeUndefined();
+	});
+
+	it('displays an error when the rejection request fails', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const component = fixture.componentInstance;
+
+		const api = TestBed.inject(
+			(await import('../../api/cr-api.service')).CrApiService
+		);
+		api.failNext = true;
+
+		component.rejectControl.setValue('Incorrect pricing');
+		await component.reject();
+
+		expect(component.detail?.status).toBe('PENDING_APPROVAL');
+		expect(component.actionError).toBe('Network error');
+	});
+
 });
