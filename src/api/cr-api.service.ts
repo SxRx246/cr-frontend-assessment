@@ -65,6 +65,9 @@ export class CrApiService {
 		if (!cr || cr.orgCode !== user.orgCode) return this.fail<CrDetail>('Not found');
 		const updated: CrDetail = { ...cr, status, updatedAt: at, audit: [...cr.audit, { action, byUserId: user.id, at, note }] };
 		this.detailStore[id] = updated;
-		return this.settle({ ...updated });
+		return this.settle({ ...updated }).then((result) => {
+			this.detailStore[id] = updated;
+			return result;
+		});
 	}
 }
