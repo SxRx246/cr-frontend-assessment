@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CrApiService } from '../../api/cr-api.service';
 import { SessionService } from '../../session/session.service';
 import { CrDetail, TimelineEntry } from '../../models/cr.models';
@@ -26,8 +26,10 @@ export class CrDetailComponent implements OnInit {
 	state: ViewState<CrDetail> = idle();
 	submitting = false;
 	actionError?: string;
-	// TODO: add validation so the form is invalid until a reason is entered.
-	rejectControl = new FormControl('', { nonNullable: true });
+	rejectControl = new FormControl('', {
+		nonNullable: true,
+		validators: [Validators.required, Validators.pattern(/\S/)],
+	});
 
 	constructor(private readonly api: CrApiService, private readonly session: SessionService) { }
 
@@ -110,9 +112,40 @@ export class CrDetailComponent implements OnInit {
 	}
 
 
+
 	async reject(): Promise<void> {
-		// TODO: require a valid rejectControl, then perform the reject action through the API and
-		//       reflect the outcome in the view.
-		throw new Error('reject() not implemented');
+		if (!this.canApprove || this.submitting || !this.detail) {
+			return;
+		}
+
+		this.rejectControl.markAsTouched();
+
+		if (this.rejectControl.invalid) {
+			return;
+		}
+
+		const reason = this.rejectControl.value.trim();
+
+		this.submitting = true;
+		this.actionError = undefined;
+
+		try {
+			const updatedDetail = await this.api.reject(
+				this.session.user,
+				this.detail.id,
+				new Date().toISOString(),
+				reason
+			);
+
+			this.state = {
+				status: 'loaded',
+				data: updatedDetail,
+			};
+		} catch (err) {
+			this.actionError = (err as Error).message;
+		} finally {
+			this.submitting = false;
+		}
 	}
+
 }
