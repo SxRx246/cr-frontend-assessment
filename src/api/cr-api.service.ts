@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CrDetail, CrSummary, ReqUser } from '../models/cr.models';
 import { details as fixtureDetails, summaries as fixtureSummaries } from './fixtures';
+import { canApprovePolicy } from '../common/permissions';
 
 /**
  * Mock API service standing in for the real HTTP service. It is org-scoped (returns only the
@@ -62,7 +63,20 @@ export class CrApiService {
 
 	private transition(user: ReqUser, id: string, status: CrDetail['status'], action: string, at: string, note?: string): Promise<CrDetail> {
 		const cr = this.detailStore[id];
-		if (!cr || cr.orgCode !== user.orgCode) return this.fail<CrDetail>('Not found');
+
+		if (!cr || cr.orgCode !== user.orgCode) {
+			return this.fail<CrDetail>('Not found');
+		}
+
+		if (!canApprovePolicy(user)) {
+			return this.fail<CrDetail>('Forbidden');
+		}
+
+		if (cr.status !== 'PENDING_APPROVAL') {
+			return this.fail<CrDetail>(
+				'Change request is not pending approval'
+			);
+		}
 		const updated: CrDetail = { ...cr, status, updatedAt: at, audit: [...cr.audit, { action, byUserId: user.id, at, note }] };
 		this.detailStore[id] = updated;
 		return this.settle({ ...updated }).then((result) => {
