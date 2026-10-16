@@ -91,4 +91,55 @@ describe('CrDetailComponent', () => {
 
 		expect(storedDetail.status).toBe('PENDING_APPROVAL');
 	});
+
+
+	it('approves a change request successfully', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const component = fixture.componentInstance;
+
+		await component.approve();
+
+		expect(component.detail?.status).toBe('APPROVED');
+		expect(component.actionError).toBeUndefined();
+	});
+
+	it('displays an error when the approval request fails', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const component = fixture.componentInstance;
+		const api = TestBed.inject(
+			(await import('../../api/cr-api.service')).CrApiService
+		);
+
+		api.failNext = true;
+
+		await component.approve();
+
+		expect(component.detail?.status).toBe('PENDING_APPROVAL');
+		expect(component.actionError).toBe('Network error');
+
+		const storedDetail = await api.getChangeRequest(
+			users.approver,
+			'CR-1'
+		);
+
+		expect(storedDetail.status).toBe('PENDING_APPROVAL');
+	});
+
+	it('prevents duplicate approval submissions', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const component = fixture.componentInstance;
+		const api = TestBed.inject(
+			(await import('../../api/cr-api.service')).CrApiService
+		);
+		const approveSpy = jest.spyOn(api, 'approve');
+
+		const firstRequest = component.approve();
+		const secondRequest = component.approve();
+
+		await Promise.all([firstRequest, secondRequest]);
+
+		expect(approveSpy).toHaveBeenCalledTimes(1);
+		expect(component.detail?.status).toBe('APPROVED');
+	});
+
 });
