@@ -5,7 +5,7 @@
 - **Fixed bugs:** Corrected the line-item comparison to detect changes in descriptions, quantities, and unit prices. Fixed the approval permission checks so unauthorized users cannot approve requests.
 - **Change request list:** Added loading, empty, and error states, a retry option, and a status filter.
 - **Change request details:** Added line-item comparisons, baseline and proposed totals, total changes, and a timeline sorted from oldest to newest.
-- **Approval and rejection:** Added permission checks, loading feedback, error messages, and rejection reason validation.
+- **Approval and rejection:** Added permission-aware action visibility, loading feedback, error messages, and rejection reason validation. The change request list refreshes after a successful approval or rejection.
 - **API behavior:** Added checks for organization access, approval permissions, and valid request statuses. Failed operations do not change the stored request data.
 
 ## 2. Component and State Model
@@ -22,7 +22,7 @@ Each component has a clear role, while the API service handles data operations a
 | Rule | How it is enforced |
 |---|---|
 | Users can only access requests from their organization. | API service access checks. |
-| Only authorized users can approve requests. | Permission checks in the component and API service. |
+| Only authorized users can approve or reject requests. | Permission checks and action visibility in the component, plus API validation. |
 | Only pending requests can be approved or rejected. | Component checks and API status validation. |
 | Rejection reasons cannot be empty or contain only spaces. | Reactive form validation and input trimming. |
 | Failed operations must not change stored request data. | The API service updates its data only after success. |
@@ -38,7 +38,7 @@ Each component has a clear role, while the API service handles data operations a
 - Tested rejection validation and repeated approval submissions.
 - Tested API permissions and invalid status changes.
 
-**Results:** All 26 tests passed across four test suites. The production build and lint checks also passed.
+**Results:** All 27 tests passed across four test suites. The production build and lint checks also passed.
 
 I focused on testing the main features, permission rules, and possible failure cases. End-to-end tests and integration with a real backend were outside the scope of this assessment.
 
