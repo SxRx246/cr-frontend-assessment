@@ -31,7 +31,7 @@ export class CrDetailComponent implements OnInit {
 		validators: [Validators.required, Validators.pattern(/\S/)],
 	});
 
-	constructor(private readonly api: CrApiService, private readonly session: SessionService) { }
+	constructor(private readonly api: CrApiService, private readonly session: SessionService) {}
 
 	ngOnInit(): void {
 		void this.load();
@@ -58,9 +58,7 @@ export class CrDetailComponent implements OnInit {
 
 	/** Approval timeline, oldest-first. */
 	get timeline(): TimelineEntry[] {
-		return [...(this.detail?.audit ?? [])].sort(
-			(first, second) => Date.parse(first.at) - Date.parse(second.at)
-		);
+		return [...(this.detail?.audit ?? [])].sort((first, second) => Date.parse(first.at) - Date.parse(second.at));
 	}
 
 	/** Whether the current user may approve the loaded CR. */
@@ -70,10 +68,7 @@ export class CrDetailComponent implements OnInit {
 	// }
 
 	get canApprove(): boolean {
-		return (
-			this.detail?.status === 'PENDING_APPROVAL' &&
-			canApprovePolicy(this.session.user)
-		);
+		return this.detail?.status === 'PENDING_APPROVAL' && canApprovePolicy(this.session.user);
 	}
 
 	get canReject(): boolean {
@@ -84,7 +79,6 @@ export class CrDetailComponent implements OnInit {
 		return this.detail ? formatMoney(amount, this.detail.currency) : String(amount);
 	}
 
-
 	async approve(): Promise<void> {
 		if (!this.canApprove || this.submitting || !this.detail) {
 			return;
@@ -94,11 +88,7 @@ export class CrDetailComponent implements OnInit {
 		this.actionError = undefined;
 
 		try {
-			const updatedDetail = await this.api.approve(
-				this.session.user,
-				this.detail.id,
-				new Date().toISOString()
-			);
+			const updatedDetail = await this.api.approve(this.session.user, this.detail.id, new Date().toISOString());
 
 			this.state = {
 				status: 'loaded',
@@ -110,8 +100,6 @@ export class CrDetailComponent implements OnInit {
 			this.submitting = false;
 		}
 	}
-
-
 
 	async reject(): Promise<void> {
 		if (!this.canApprove || this.submitting || !this.detail) {
@@ -130,12 +118,7 @@ export class CrDetailComponent implements OnInit {
 		this.actionError = undefined;
 
 		try {
-			const updatedDetail = await this.api.reject(
-				this.session.user,
-				this.detail.id,
-				new Date().toISOString(),
-				reason
-			);
+			const updatedDetail = await this.api.reject(this.session.user, this.detail.id, new Date().toISOString(), reason);
 
 			this.state = {
 				status: 'loaded',
@@ -147,5 +130,4 @@ export class CrDetailComponent implements OnInit {
 			this.submitting = false;
 		}
 	}
-
 }

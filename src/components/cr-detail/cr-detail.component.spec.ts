@@ -38,7 +38,6 @@ describe('CrDetailComponent', () => {
 		expect(actions).toBeNull();
 	});
 
-
 	it('does not reject a change request with an empty reason', async () => {
 		const fixture = await render(users.approver, 'CR-1');
 		const component = fixture.componentInstance;
@@ -76,9 +75,7 @@ describe('CrDetailComponent', () => {
 		const fixture = await render(users.approver, 'CR-1');
 		const component = fixture.componentInstance;
 
-		const api = TestBed.inject(
-			(await import('../../api/cr-api.service')).CrApiService
-		);
+		const api = TestBed.inject((await import('../../api/cr-api.service')).CrApiService);
 		api.failNext = true;
 
 		component.rejectControl.setValue('Incorrect pricing');
@@ -86,6 +83,12 @@ describe('CrDetailComponent', () => {
 
 		expect(component.detail?.status).toBe('PENDING_APPROVAL');
 		expect(component.actionError).toBe('Network error');
-	});
 
+		const storedDetail = await api.getChangeRequest(
+			users.approver,
+			'CR-1'
+		);
+
+		expect(storedDetail.status).toBe('PENDING_APPROVAL');
+	});
 });

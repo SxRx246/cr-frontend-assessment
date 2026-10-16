@@ -21,9 +21,18 @@ export class CrListComponent implements OnInit {
 
 	state: ViewState<CrSummary[]> = idle();
 	statusFilter: CrStatus | 'ALL' = 'ALL';
-	readonly statuses: (CrStatus | 'ALL')[] = ['ALL', 'DRAFT', 'SUBMITTED', 'PENDING_APPROVAL', 'APPROVED', 'APPLIED', 'REJECTED', 'CANCELLED'];
+	readonly statuses: (CrStatus | 'ALL')[] = [
+		'ALL',
+		'DRAFT',
+		'SUBMITTED',
+		'PENDING_APPROVAL',
+		'APPROVED',
+		'APPLIED',
+		'REJECTED',
+		'CANCELLED',
+	];
 
-	constructor(private readonly api: CrApiService, private readonly session: SessionService) { }
+	constructor(private readonly api: CrApiService, private readonly session: SessionService) {}
 
 	ngOnInit(): void {
 		void this.load();

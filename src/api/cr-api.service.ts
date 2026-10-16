@@ -42,7 +42,9 @@ export class CrApiService {
 			.filter((s) => s.orgCode === user.orgCode)
 			.map((s) => {
 				const d = this.detailStore[s.id];
-				return d ? { id: d.id, title: d.title, status: d.status, orgCode: d.orgCode, delta: d.delta, currency: d.currency, updatedAt: d.updatedAt } : { ...s };
+				return d
+					? { id: d.id, title: d.title, status: d.status, orgCode: d.orgCode, delta: d.delta, currency: d.currency, updatedAt: d.updatedAt }
+					: { ...s };
 			});
 		return this.settle(rows);
 	}
@@ -73,12 +75,15 @@ export class CrApiService {
 		}
 
 		if (cr.status !== 'PENDING_APPROVAL') {
-			return this.fail<CrDetail>(
-				'Change request is not pending approval'
-			);
+			return this.fail<CrDetail>('Change request is not pending approval');
 		}
-		const updated: CrDetail = { ...cr, status, updatedAt: at, audit: [...cr.audit, { action, byUserId: user.id, at, note }] };
-		this.detailStore[id] = updated;
+		const updated: CrDetail = {
+			...cr,
+			status,
+			updatedAt: at,
+			audit: [...cr.audit, { action, byUserId: user.id, at, note }],
+		};
+
 		return this.settle({ ...updated }).then((result) => {
 			this.detailStore[id] = updated;
 			return result;
