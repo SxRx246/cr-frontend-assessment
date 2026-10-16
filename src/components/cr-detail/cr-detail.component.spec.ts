@@ -6,19 +6,29 @@ import { ReqUser } from '../../models/cr.models';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
-async function render(user: ReqUser, id: string): Promise<ComponentFixture<CrDetailComponent>> {
+
+async function render(
+	user: ReqUser,
+	id: string
+): Promise<ComponentFixture<CrDetailComponent>> {
 	TestBed.configureTestingModule({
 		imports: [CrDetailComponent],
 		providers: [{ provide: SessionService, useValue: { user } }],
 	});
+
 	await TestBed.compileComponents();
+
 	const fixture = TestBed.createComponent(CrDetailComponent);
-	fixture.componentInstance.id = id;
-	fixture.detectChanges(); // ngOnInit -> load()
-	await flush(); // let the mock API resolve
-	fixture.detectChanges(); // render the loaded state
+
+	fixture.componentRef.setInput('id', id);
+	fixture.detectChanges();
+
+	await flush();
+	fixture.detectChanges();
+
 	return fixture;
 }
+
 
 describe('CrDetailComponent', () => {
 	it('loads and renders the change request title', async () => {
@@ -190,7 +200,7 @@ describe('CrDetailComponent', () => {
 		api.latencyMs = 100;
 
 		const fixture = TestBed.createComponent(CrDetailComponent);
-		fixture.componentInstance.id = 'CR-1';
+		fixture.componentRef.setInput('id', 'CR-1');
 		fixture.detectChanges();
 
 		expect(
@@ -205,6 +215,7 @@ describe('CrDetailComponent', () => {
 		).not.toBeNull();
 	});
 
+
 	it('shows an error state when loading the detail fails', async () => {
 		TestBed.configureTestingModule({
 			imports: [CrDetailComponent],
@@ -215,18 +226,20 @@ describe('CrDetailComponent', () => {
 
 		await TestBed.compileComponents();
 
+		const fixture = TestBed.createComponent(CrDetailComponent);
 		const api = TestBed.inject(
 			(await import('../../api/cr-api.service')).CrApiService
 		);
+
 		api.failNext = true;
 
-		const fixture = TestBed.createComponent(CrDetailComponent);
-		fixture.componentInstance.id = 'CR-1';
+		fixture.componentRef.setInput('id', 'CR-1');
 		fixture.detectChanges();
 
 		await flush();
 		fixture.detectChanges();
 
+		expect(fixture.componentInstance.state.status).toBe('error');
 		expect(
 			fixture.nativeElement.querySelector('.cr-detail__error')
 		).not.toBeNull();
@@ -234,6 +247,25 @@ describe('CrDetailComponent', () => {
 		expect(
 			fixture.nativeElement.querySelector('.cr-detail__error button')
 		).not.toBeNull();
+	});
+
+
+
+	it('loads the selected change request when the ID changes', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+
+		expect(fixture.componentInstance.detail?.id).toBe('CR-1');
+
+		fixture.componentRef.setInput('id', 'CR-2');
+		fixture.detectChanges();
+
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		fixture.detectChanges();
+
+		expect(fixture.componentInstance.detail?.id).toBe('CR-2');
+		expect(
+			fixture.nativeElement.querySelector('.cr-detail__header h2').textContent
+		).toContain('Replace SKU-B supplier');
 	});
 
 
