@@ -21,4 +21,28 @@ describe('computeDiff', () => {
 		const rows = computeDiff(base, [{ ...base[0], quantity: 11 }, base[1]]);
 		expect(rows.find((r) => r.sku === 'SKU-A')?.kind).toBe('changed');
 	});
+
+	it('detects a description change as changed', () => {
+        const rows = computeDiff(base, [
+            { ...base[0], description: 'Updated Widget A' },
+            base[1],
+        ]);
+
+        expect(rows.find((row) => row.sku === 'SKU-A')?.kind).toBe('changed');
+    });
+
+    it('detects a unit price change as changed', () => {
+        const rows = computeDiff(base, [
+            { ...base[0], unitPrice: 550 },
+            base[1],
+        ]);
+
+        expect(rows.find((row) => row.sku === 'SKU-A')?.kind).toBe('changed');
+    });
+
+    it('detects an unchanged line item', () => {
+        const rows = computeDiff(base, [...base]);
+
+        expect(rows.find((row) => row.sku === 'SKU-A')?.kind).toBe('unchanged');
+    });
 });

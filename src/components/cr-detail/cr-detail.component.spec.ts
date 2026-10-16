@@ -142,4 +142,37 @@ describe('CrDetailComponent', () => {
 		expect(component.detail?.status).toBe('APPROVED');
 	});
 
+
+	it('displays timeline entries in chronological order', async () => {
+		const fixture = await render(users.approver, 'CR-1');
+		const component = fixture.componentInstance;
+
+		const detail = component.detail;
+
+		if (!detail) {
+			throw new Error('Change request detail was not loaded');
+		}
+
+		detail.audit.splice(
+			0,
+			detail.audit.length,
+			{
+				action: 'REJECTED',
+				byUserId: 'user-2',
+				at: '2026-01-02T10:00:00Z',
+			},
+			{
+				action: 'SUBMITTED',
+				byUserId: 'user-1',
+				at: '2026-01-01T10:00:00Z',
+			}
+		);
+
+		expect(component.timeline.map((entry) => entry.action)).toEqual([
+			'SUBMITTED',
+			'REJECTED',
+		]);
+	});
+
+
 });
