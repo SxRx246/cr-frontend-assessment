@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core'; import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core'; import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CrApiService } from '../../api/cr-api.service';
 import { SessionService } from '../../session/session.service';
@@ -21,6 +21,7 @@ import { canApprovePolicy } from '../../common/permissions';
 })
 export class CrDetailComponent implements OnChanges {
 	@Input() id!: string;
+	@Output() changed = new EventEmitter<void>();
 
 	state: ViewState<CrDetail> = idle();
 	submitting = false;
@@ -95,6 +96,7 @@ export class CrDetailComponent implements OnChanges {
 				status: 'loaded',
 				data: updatedDetail,
 			};
+			this.changed.emit();
 		} catch (err) {
 			this.actionError = (err as Error).message;
 		} finally {
@@ -125,6 +127,7 @@ export class CrDetailComponent implements OnChanges {
 				status: 'loaded',
 				data: updatedDetail,
 			};
+			this.changed.emit();
 		} catch (err) {
 			this.actionError = (err as Error).message;
 		} finally {
