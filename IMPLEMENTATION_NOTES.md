@@ -6,7 +6,7 @@
 - **Change request list:** Added loading, empty, and error states, a retry option, and a status filter.
 - **Change request details:** Added line-item comparisons, baseline and proposed totals, total changes, and a timeline sorted from oldest to newest.
 - **Approval and rejection:** Added permission-aware action visibility, loading feedback, error messages, and rejection reason validation. The change request list refreshes after a successful approval or rejection.
-- **API behavior:** Added checks for organization access, approval permissions, and valid request statuses. Failed operations do not change the stored request data.
+- **API behavior:** Added checks for organization access, review permissions, and valid request statuses. Failed operations do not change the stored request data.
 
 ## 2. Component and State Model
 
