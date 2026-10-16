@@ -174,5 +174,67 @@ describe('CrDetailComponent', () => {
 		]);
 	});
 
+	it('shows a loading state while the detail is being fetched', async () => {
+		TestBed.configureTestingModule({
+			imports: [CrDetailComponent],
+			providers: [
+				{ provide: SessionService, useValue: { user: users.approver } },
+			],
+		});
+
+		await TestBed.compileComponents();
+
+		const api = TestBed.inject(
+			(await import('../../api/cr-api.service')).CrApiService
+		);
+		api.latencyMs = 100;
+
+		const fixture = TestBed.createComponent(CrDetailComponent);
+		fixture.componentInstance.id = 'CR-1';
+		fixture.detectChanges();
+
+		expect(
+			fixture.nativeElement.querySelector('.cr-detail__loading')
+		).not.toBeNull();
+
+		await new Promise((resolve) => setTimeout(resolve, 150));
+		fixture.detectChanges();
+
+		expect(
+			fixture.nativeElement.querySelector('.cr-detail__header')
+		).not.toBeNull();
+	});
+
+	it('shows an error state when loading the detail fails', async () => {
+		TestBed.configureTestingModule({
+			imports: [CrDetailComponent],
+			providers: [
+				{ provide: SessionService, useValue: { user: users.approver } },
+			],
+		});
+
+		await TestBed.compileComponents();
+
+		const api = TestBed.inject(
+			(await import('../../api/cr-api.service')).CrApiService
+		);
+		api.failNext = true;
+
+		const fixture = TestBed.createComponent(CrDetailComponent);
+		fixture.componentInstance.id = 'CR-1';
+		fixture.detectChanges();
+
+		await flush();
+		fixture.detectChanges();
+
+		expect(
+			fixture.nativeElement.querySelector('.cr-detail__error')
+		).not.toBeNull();
+
+		expect(
+			fixture.nativeElement.querySelector('.cr-detail__error button')
+		).not.toBeNull();
+	});
+
 
 });
