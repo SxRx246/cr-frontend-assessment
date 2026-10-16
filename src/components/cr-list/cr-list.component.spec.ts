@@ -43,4 +43,66 @@ describe('CrListComponent', () => {
 		expect(rows.length).toBe(1);
 		expect(rows[0].textContent).toContain('CR-1');
 	});
+
+
+	it('shows a loading state while change requests are being fetched', async () => {
+		TestBed.configureTestingModule({
+			imports: [CrListComponent],
+			providers: [
+				{ provide: SessionService, useValue: { user: users.approver } },
+			],
+		});
+
+		await TestBed.compileComponents();
+
+		const api = TestBed.inject(
+			(await import('../../api/cr-api.service')).CrApiService
+		);
+		api.latencyMs = 100;
+
+		const fixture = TestBed.createComponent(CrListComponent);
+		fixture.detectChanges();
+
+		expect(
+			fixture.nativeElement.querySelector('.cr-list__loading')
+		).not.toBeNull();
+
+		await new Promise((resolve) => setTimeout(resolve, 150));
+		fixture.detectChanges();
+
+		expect(
+			fixture.nativeElement.querySelector('.cr-list__table')
+		).not.toBeNull();
+	});
+
+	it('shows an error state when loading change requests fails', async () => {
+		TestBed.configureTestingModule({
+			imports: [CrListComponent],
+			providers: [
+				{ provide: SessionService, useValue: { user: users.approver } },
+			],
+		});
+
+		await TestBed.compileComponents();
+
+		const api = TestBed.inject(
+			(await import('../../api/cr-api.service')).CrApiService
+		);
+		api.failNext = true;
+
+		const fixture = TestBed.createComponent(CrListComponent);
+		fixture.detectChanges();
+
+		await flush();
+		fixture.detectChanges();
+
+		expect(
+			fixture.nativeElement.querySelector('.cr-list__error')
+		).not.toBeNull();
+
+		expect(
+			fixture.nativeElement.querySelector('.cr-list__error button')
+		).not.toBeNull();
+	});
+
 });
