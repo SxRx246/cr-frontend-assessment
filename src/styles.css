@@ -55,3 +55,35 @@ button:disabled {
 .cr-diff__row[data-kind='removed'] {
 	background: #fdecea;
 }
+.cr-timeline__list {
+  padding-left: 1.5rem;
+}
+
+.cr-timeline__entry {
+  margin-bottom: 1rem;
+  padding-left: 0.25rem;
+}
+
+.cr-timeline__details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.cr-timeline__action {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.cr-timeline__by,
+.cr-timeline__at {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.cr-timeline__note {
+  margin: 0.35rem 0 0;
+  overflow-wrap: anywhere;
+}
